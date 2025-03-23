@@ -23,6 +23,9 @@ export default {
 			}
 		},
 		extend: {
+			blur: {
+				xs: '2px',
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',

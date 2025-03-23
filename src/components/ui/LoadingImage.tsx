@@ -42,7 +42,7 @@ const LoadingImage = ({
         alt={alt}
         className={cn(
           'w-full h-full object-cover transition-all duration-500',
-          isLoading ? 'image-blur-loading' : 'image-blur-loaded',
+          isLoading ? 'blur-xs transition-all duration-700' : 'blur-0',
           className
         )}
         {...props}
