@@ -3,8 +3,19 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, MessageSquare, Activity, Users } from 'lucide-react';
 import { Motion, MotionStagger } from './ui/motion';
 import LoadingImage from './ui/LoadingImage';
+import { useNavigate } from 'react-router-dom';
 
 const Hero = () => {
+  const navigate = useNavigate();
+
+  const handleStartFree = () => {
+    navigate('/sign-up');
+  };
+
+  const handleHowItWorks = () => {
+    navigate('/how-it-works');
+  };
+
   return (
     <section className="pt-32 pb-24 overflow-hidden">
       <div className="container px-4 md:px-6">
@@ -31,11 +42,11 @@ const Hero = () => {
             
             <Motion variant="fade-up" delay={300}>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="pulse-btn group">
+                <Button size="lg" className="pulse-btn group" onClick={handleStartFree}>
                   Start for free
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Button>
-                <Button size="lg" variant="outline">
+                <Button size="lg" variant="outline" onClick={handleHowItWorks}>
                   See how it works
                 </Button>
               </div>

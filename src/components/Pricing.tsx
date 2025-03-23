@@ -4,9 +4,11 @@ import { Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Motion } from './ui/motion';
 import { cn } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
 
 const Pricing = () => {
   const [annual, setAnnual] = useState(true);
+  const navigate = useNavigate();
   
   const plans = [
     {
@@ -76,6 +78,20 @@ const Pricing = () => {
 
   const calculatePrice = (plan: any) => {
     return annual ? plan.annualPrice : plan.monthlyPrice;
+  };
+
+  const handlePlanSelect = (plan: any) => {
+    if (plan.name === "Enterprise") {
+      // Redirect to contact form
+      window.location.href = "#contact";
+    } else {
+      // Redirect to sign up with plan info
+      navigate(`/sign-up?plan=${plan.name.toLowerCase()}`);
+    }
+  };
+
+  const handleContactSales = () => {
+    window.location.href = "#contact";
   };
 
   return (
@@ -210,6 +226,7 @@ const Pricing = () => {
                     )}
                     variant={plan.highlight ? "default" : "outline"}
                     size="lg"
+                    onClick={() => handlePlanSelect(plan)}
                   >
                     {plan.cta}
                   </Button>
@@ -225,7 +242,7 @@ const Pricing = () => {
             <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
               We offer tailored plans for businesses with specific requirements. Contact our sales team to discuss your needs.
             </p>
-            <Button variant="outline" size="lg">
+            <Button variant="outline" size="lg" onClick={handleContactSales}>
               Contact Sales
             </Button>
           </div>

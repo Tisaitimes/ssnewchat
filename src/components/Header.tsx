@@ -3,12 +3,15 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Menu, X } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Motion } from './ui/motion';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -32,8 +35,24 @@ const Header = () => {
     { label: 'Features', href: '#features' },
     { label: 'Pricing', href: '#pricing' },
     { label: 'Testimonials', href: '#testimonials' },
-    { label: 'Contact', href: '#contact' },
+    { label: 'How It Works', href: '/how-it-works' },
   ];
+
+  const handleSignIn = () => {
+    navigate('/sign-in');
+  };
+
+  const handleSignUp = () => {
+    navigate('/sign-up');
+  };
+
+  const handleStartFree = () => {
+    navigate('/sign-up');
+  };
+
+  const handleDashboard = () => {
+    navigate('/dashboard');
+  };
 
   return (
     <header 
@@ -60,12 +79,21 @@ const Header = () => {
             <ul className="flex space-x-8">
               {navItems.map((item, i) => (
                 <li key={i}>
-                  <a 
-                    href={item.href}
-                    className="text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-white transition-colors"
-                  >
-                    {item.label}
-                  </a>
+                  {item.href.startsWith('#') ? (
+                    <a 
+                      href={item.href}
+                      className="text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-white transition-colors"
+                    >
+                      {item.label}
+                    </a>
+                  ) : (
+                    <Link 
+                      to={item.href}
+                      className="text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-white transition-colors"
+                    >
+                      {item.label}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>
@@ -73,12 +101,20 @@ const Header = () => {
           
           <Motion variant="fade-down" duration={800} delay={100}>
             <div className="flex items-center space-x-3">
-              <Button variant="outline" size="sm" className="h-9">
-                Sign in
-              </Button>
-              <Button size="sm" className="h-9">
-                Get started
-              </Button>
+              {user ? (
+                <Button onClick={handleDashboard}>
+                  Dashboard
+                </Button>
+              ) : (
+                <>
+                  <Button variant="outline" size="sm" className="h-9" onClick={handleSignIn}>
+                    Sign in
+                  </Button>
+                  <Button size="sm" className="h-9" onClick={handleSignUp}>
+                    Get started
+                  </Button>
+                </>
+              )}
             </div>
           </Motion>
         </nav>
@@ -107,27 +143,69 @@ const Header = () => {
           <ul className="flex flex-col space-y-6">
             {navItems.map((item, i) => (
               <li key={i}>
-                <a 
-                  href={item.href}
-                  className="text-lg font-medium block py-2 border-b border-gray-100 dark:border-gray-800"
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    document.body.style.overflow = '';
-                  }}
-                >
-                  {item.label}
-                </a>
+                {item.href.startsWith('#') ? (
+                  <a 
+                    href={item.href}
+                    className="text-lg font-medium block py-2 border-b border-gray-100 dark:border-gray-800"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      document.body.style.overflow = '';
+                    }}
+                  >
+                    {item.label}
+                  </a>
+                ) : (
+                  <Link
+                    to={item.href}
+                    className="text-lg font-medium block py-2 border-b border-gray-100 dark:border-gray-800"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      document.body.style.overflow = '';
+                    }}
+                  >
+                    {item.label}
+                  </Link>
+                )}
               </li>
             ))}
           </ul>
           
           <div className="mt-8 flex flex-col space-y-4">
-            <Button variant="outline" className="w-full" size="lg">
-              Sign in
-            </Button>
-            <Button className="w-full" size="lg">
-              Get started
-            </Button>
+            {user ? (
+              <Button className="w-full" size="lg" onClick={() => {
+                handleDashboard();
+                setMobileMenuOpen(false);
+                document.body.style.overflow = '';
+              }}>
+                Dashboard
+              </Button>
+            ) : (
+              <>
+                <Button 
+                  variant="outline" 
+                  className="w-full" 
+                  size="lg"
+                  onClick={() => {
+                    handleSignIn();
+                    setMobileMenuOpen(false);
+                    document.body.style.overflow = '';
+                  }}
+                >
+                  Sign in
+                </Button>
+                <Button 
+                  className="w-full" 
+                  size="lg"
+                  onClick={() => {
+                    handleSignUp();
+                    setMobileMenuOpen(false);
+                    document.body.style.overflow = '';
+                  }}
+                >
+                  Get started
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>
