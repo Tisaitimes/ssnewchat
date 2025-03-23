@@ -21,7 +21,8 @@ import {
   PanelLeft,
   Zap,
   Headphones,
-  Ticket
+  Ticket,
+  MessagesSquare
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -33,6 +34,7 @@ import Analytics from '@/components/dashboard/Analytics';
 import SecureMessaging from '@/components/dashboard/SecureMessaging';
 import MarketingAutomation from '@/components/dashboard/MarketingAutomation';
 import TicketSystem from '@/components/dashboard/TicketSystem';
+import Conversation from '@/components/dashboard/Conversation';
 import { toast } from 'sonner';
 import { 
   DropdownMenu,
@@ -85,6 +87,7 @@ const Dashboard = () => {
   const menuItems = [
     { title: "Overview", icon: Home, value: "overview" },
     { title: "WhatsApp", icon: MessageSquare, value: "whatsapp" },
+    { title: "Conversation", icon: MessagesSquare, value: "conversation" },
     { title: "Chatbot", icon: Bot, value: "chatbot" },
     { title: "Broadcasting", icon: Send, value: "broadcasting" },
     { title: "Agents", icon: Users, value: "agents" },
@@ -320,6 +323,7 @@ const Dashboard = () => {
               )}
               
               {activeTab === 'whatsapp' && <WhatsAppIntegration />}
+              {activeTab === 'conversation' && <Conversation />}
               {activeTab === 'chatbot' && <ChatbotBuilder />}
               {activeTab === 'broadcasting' && <Broadcasting />}
               {activeTab === 'agents' && <AgentManagement />}
