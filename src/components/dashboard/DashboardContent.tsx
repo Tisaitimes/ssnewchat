@@ -7,7 +7,6 @@ import ChatbotBuilder from './ChatbotBuilder';
 import Broadcasting from './Broadcasting';
 import AgentManagement from './AgentManagement';
 import Analytics from './Analytics';
-import SecureMessaging from './SecureMessaging';
 import MarketingAutomation from './MarketingAutomation';
 import TicketSystem from './TicketSystem';
 import Conversation from './Conversation';
