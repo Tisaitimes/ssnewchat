@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,18 +9,18 @@ import {
   Download,
   Upload,
   MessageSquare,
-  Database
+  Database,
+  Globe
 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { AddLeadModal } from '@/components/ui/add-lead-modal';
-import { toast } from 'react-toastify';
+import AddLeadModal from '@/components/dashboard/modals/AddLeadModal';
+import { toast } from 'sonner';
 
 const LeadManagement = () => {
   const [isAddLeadModalOpen, setIsAddLeadModalOpen] = useState(false);
-
-  const leads = [
+  const [leads, setLeads] = useState([
     {
       name: 'John Doe',
       email: 'john.doe@example.com',
@@ -41,7 +42,7 @@ const LeadManagement = () => {
       status: 'Qualified',
       source: 'Facebook',
     }
-  ];
+  ]);
 
   const getSourceIcon = (source: string) => {
     switch (source.toLowerCase()) {
