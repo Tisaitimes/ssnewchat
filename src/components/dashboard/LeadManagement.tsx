@@ -10,7 +10,8 @@ import {
   Upload,
   MessageSquare,
   Database,
-  Globe
+  Globe,
+  FileText
 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -27,20 +28,26 @@ const LeadManagement = () => {
       phone: '+1 (555) 123-4567',
       status: 'New',
       source: 'WhatsApp',
+      avatarUrl: 'https://ui-avatars.com/api/?name=John+Doe&background=random',
+      notes: 'Interested in premium plan'
     },
     {
       name: 'Jane Smith',
       email: 'jane.smith@example.com',
       phone: '+1 (555) 987-6543',
-      status: 'Contacted',
+      status: 'Qualified',
       source: 'Website',
+      avatarUrl: 'https://ui-avatars.com/api/?name=Jane+Smith&background=random',
+      notes: 'Looking for a custom solution'
     },
     {
       name: 'Robert Johnson',
       email: 'robert.johnson@example.com',
       phone: '+1 (555) 567-8901',
-      status: 'Qualified',
+      status: 'Proposal',
       source: 'Facebook',
+      avatarUrl: 'https://ui-avatars.com/api/?name=Robert+Johnson&background=random',
+      notes: 'Follow up next week'
     }
   ]);
 
@@ -50,6 +57,18 @@ const LeadManagement = () => {
       case 'facebook': return <MessageSquare className="h-4 w-4 text-blue-500" />;
       case 'website': return <Globe className="h-4 w-4 text-purple-500" />;
       default: return <MessageSquare className="h-4 w-4 text-gray-500" />;
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'new': return 'bg-blue-100 text-blue-800';
+      case 'connected': return 'bg-green-100 text-green-800';
+      case 'qualified': return 'bg-purple-100 text-purple-800';
+      case 'proposal': return 'bg-orange-100 text-orange-800';
+      case 'converted': return 'bg-emerald-100 text-emerald-800';
+      case 'lost': return 'bg-gray-100 text-gray-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -65,9 +84,12 @@ const LeadManagement = () => {
   };
 
   const handleExport = () => {
-    const csv = leads.map(lead => 
-      `${lead.name},${lead.email},${lead.phone},${lead.status},${lead.source}`
-    ).join('\n');
+    const csv = [
+      'Name,Email,Phone,Status,Source,Notes',
+      ...leads.map(lead => 
+        `${lead.name},${lead.email},${lead.phone},${lead.status},${lead.source},"${lead.notes || ''}"`
+      )
+    ].join('\n');
     
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -138,6 +160,7 @@ const LeadManagement = () => {
                   <TableHead>Lead</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Source</TableHead>
+                  <TableHead>Notes</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -147,7 +170,7 @@ const LeadManagement = () => {
                       <div className="flex items-center space-x-3">
                         <Avatar>
                           <AvatarImage 
-                            src={`https://ui-avatars.com/api/?name=${lead.name}&background=random`} 
+                            src={lead.avatarUrl} 
                             alt={lead.name} 
                           />
                           <AvatarFallback>{lead.name.charAt(0)}</AvatarFallback>
@@ -155,17 +178,28 @@ const LeadManagement = () => {
                         <div>
                           <div className="font-medium">{lead.name}</div>
                           <div className="text-sm text-muted-foreground">{lead.email}</div>
+                          <div className="text-xs text-muted-foreground">{lead.phone}</div>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline">{lead.status}</Badge>
+                      <Badge className={getStatusColor(lead.status)} variant="outline">{lead.status}</Badge>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
                         {getSourceIcon(lead.source)}
                         <span>{lead.source}</span>
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      {lead.notes ? (
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground truncate max-w-[200px]">
+                          <FileText className="h-3.5 w-3.5" />
+                          <span>{lead.notes}</span>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">No notes</span>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}
