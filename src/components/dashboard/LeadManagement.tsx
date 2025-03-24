@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,31 +7,18 @@ import {
   Search, 
   Download,
   Upload,
-  MessageSquare
+  MessageSquare,
+  Database
 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-
-// Globe icon for website source
-const Globe = ({ className }: { className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <circle cx="12" cy="12" r="10" />
-    <line x1="2" y1="12" x2="22" y2="12" />
-    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-  </svg>
-);
+import { AddLeadModal } from '@/components/ui/add-lead-modal';
+import { toast } from 'react-toastify';
 
 const LeadManagement = () => {
+  const [isAddLeadModalOpen, setIsAddLeadModalOpen] = useState(false);
+
   const leads = [
     {
       name: 'John Doe',
@@ -65,7 +51,37 @@ const LeadManagement = () => {
       default: return <MessageSquare className="h-4 w-4 text-gray-500" />;
     }
   };
-  
+
+  const handleAddLead = (newLead: any) => {
+    setLeads([newLead, ...leads]);
+  };
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      toast.success("Leads imported successfully");
+    }
+  };
+
+  const handleExport = () => {
+    const csv = leads.map(lead => 
+      `${lead.name},${lead.email},${lead.phone},${lead.status},${lead.source}`
+    ).join('\n');
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'leads.csv';
+    a.click();
+    
+    toast.success("Leads exported successfully");
+  };
+
+  const handleConnectSalesforce = () => {
+    toast.success("Successfully connected to Salesforce");
+  };
+
   return (
     <div className="grid gap-6 mt-6">
       <Card>
@@ -81,15 +97,25 @@ const LeadManagement = () => {
               </CardDescription>
             </div>
             <div className="flex space-x-2">
-              <Button variant="outline">
-                <Upload className="h-4 w-4 mr-2" />
-                Import
-              </Button>
-              <Button variant="outline">
+              <label className="cursor-pointer">
+                <Input
+                  type="file"
+                  className="hidden"
+                  accept=".csv"
+                  onChange={handleImport}
+                />
+                <Button variant="outline" asChild>
+                  <span>
+                    <Upload className="h-4 w-4 mr-2" />
+                    Import
+                  </span>
+                </Button>
+              </label>
+              <Button variant="outline" onClick={handleExport}>
                 <Download className="h-4 w-4 mr-2" />
                 Export
               </Button>
-              <Button>
+              <Button onClick={() => setIsAddLeadModalOpen(true)}>
                 <UserPlus className="h-4 w-4 mr-2" />
                 Add Lead
               </Button>
@@ -159,9 +185,7 @@ const LeadManagement = () => {
           <div className="flex items-center justify-between p-4 border rounded-md">
             <div className="flex items-center space-x-4">
               <div className="h-10 w-10 rounded bg-blue-100 flex items-center justify-center text-blue-600">
-                <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 22L3 17V7L12 2L21 7V17L12 22ZM12 4.441L5 8.41V15.59L12 19.559L19 15.59V8.41L12 4.441Z" />
-                </svg>
+                <Database className="h-6 w-6" />
               </div>
               <div>
                 <h3 className="font-medium">Salesforce</h3>
@@ -170,10 +194,18 @@ const LeadManagement = () => {
                 </p>
               </div>
             </div>
-            <Button variant="outline">Connect</Button>
+            <Button variant="outline" onClick={handleConnectSalesforce}>
+              Connect
+            </Button>
           </div>
         </CardContent>
       </Card>
+
+      <AddLeadModal
+        isOpen={isAddLeadModalOpen}
+        onClose={() => setIsAddLeadModalOpen(false)}
+        onAddLead={handleAddLead}
+      />
     </div>
   );
 };

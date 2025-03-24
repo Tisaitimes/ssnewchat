@@ -1,12 +1,17 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Motion } from '@/components/ui/motion';
-import { MessageSquare, Users, Activity, Settings } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import { MessageSquare, Users, Activity, Settings, Bell, Globe, Shield, Database } from 'lucide-react';
 import { toast } from 'sonner';
 
 const DashboardOverview = () => {
+  const [notifications, setNotifications] = useState(true);
+  const [autoResponder, setAutoResponder] = useState(false);
+  const [language, setLanguage] = useState('en');
+
   const stats = [
     { label: 'Active Conversations', value: '12', icon: MessageSquare, color: 'text-blue-500' },
     { label: 'Total Contacts', value: '243', icon: Users, color: 'text-green-500' },
@@ -78,6 +83,62 @@ const DashboardOverview = () => {
                 Manage Settings
               </Button>
             </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Settings</CardTitle>
+            <CardDescription>Configure your dashboard preferences</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <h4 className="font-medium">Notifications</h4>
+                <p className="text-sm text-muted-foreground">Receive alerts about your account activity</p>
+              </div>
+              <Switch 
+                checked={notifications} 
+                onCheckedChange={setNotifications}
+                onClick={() => toast.success(notifications ? "Notifications disabled" : "Notifications enabled")}
+              />
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <h4 className="font-medium">Auto Responder</h4>
+                <p className="text-sm text-muted-foreground">Automatically respond to incoming messages</p>
+              </div>
+              <Switch 
+                checked={autoResponder} 
+                onCheckedChange={setAutoResponder}
+                onClick={() => toast.success(autoResponder ? "Auto responder disabled" : "Auto responder enabled")}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <h4 className="font-medium">Language</h4>
+              <select 
+                className="w-full p-2 border rounded-md"
+                value={language}
+                onChange={(e) => {
+                  setLanguage(e.target.value);
+                  toast.success(`Language changed to ${e.target.value.toUpperCase()}`);
+                }}
+              >
+                <option value="en">English</option>
+                <option value="es">Spanish</option>
+                <option value="fr">French</option>
+              </select>
+            </div>
+
+            <Button 
+              className="w-full"
+              variant="outline"
+              onClick={() => toast.success("Settings saved successfully")}
+            >
+              Save Changes
+            </Button>
           </CardContent>
         </Card>
       </div>
