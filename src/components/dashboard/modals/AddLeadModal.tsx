@@ -51,6 +51,7 @@ const AddLeadModal = ({ isOpen, onClose, onAddLead, initialData, isEditing = fal
   const [notes, setNotes] = useState('');
   const [address, setAddress] = useState('');
   const [createdDate, setCreatedDate] = useState<Date | undefined>(new Date());
+  const [lastContactDate, setLastContactDate] = useState<Date | undefined>(new Date());
   const [avatarUrl, setAvatarUrl] = useState('');
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -70,10 +71,22 @@ const AddLeadModal = ({ isOpen, onClose, onAddLead, initialData, isEditing = fal
       // Convert string date to Date object if available
       if (initialData.created) {
         try {
-          setCreatedDate(new Date(initialData.created));
+          const created = new Date(initialData.created);
+          setCreatedDate(created);
         } catch (error) {
           console.error("Invalid date format:", initialData.created);
           setCreatedDate(new Date());
+        }
+      }
+      
+      // Convert last contact date
+      if (initialData.lastContact) {
+        try {
+          const lastContact = new Date(initialData.lastContact);
+          setLastContactDate(lastContact);
+        } catch (error) {
+          console.error("Invalid date format:", initialData.lastContact);
+          setLastContactDate(new Date());
         }
       }
     } else {
@@ -86,10 +99,18 @@ const AddLeadModal = ({ isOpen, onClose, onAddLead, initialData, isEditing = fal
       setNotes('');
       setAddress('');
       setCreatedDate(new Date());
+      setLastContactDate(new Date());
       setAvatarUrl('');
       setAvatarFile(null);
     }
   }, [initialData, isEditing, isOpen]);
+
+  // Update last contact date whenever created date changes (for new leads only)
+  useEffect(() => {
+    if (!isEditing && createdDate) {
+      setLastContactDate(createdDate);
+    }
+  }, [createdDate, isEditing]);
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
@@ -126,7 +147,7 @@ const AddLeadModal = ({ isOpen, onClose, onAddLead, initialData, isEditing = fal
       notes,
       address,
       created: createdDate ? format(createdDate, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'),
-      lastContact: format(new Date(), 'yyyy-MM-dd'),
+      lastContact: lastContactDate ? format(lastContactDate, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'),
       avatarUrl: avatarUrl || fallbackAvatarUrl,
       initials: name.split(' ').map(n => n[0]).join('').toUpperCase(),
     };
@@ -210,20 +231,6 @@ const AddLeadModal = ({ isOpen, onClose, onAddLead, initialData, isEditing = fal
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Source</label>
-              <Select value={source} onValueChange={setSource}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select source" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="website">Website</SelectItem>
-                  <SelectItem value="whatsapp">WhatsApp</SelectItem>
-                  <SelectItem value="facebook">Facebook</SelectItem>
-                  <SelectItem value="referral">Referral</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
               <label className="text-sm font-medium">Status</label>
               <Select value={status} onValueChange={setStatus}>
                 <SelectTrigger>
@@ -266,6 +273,34 @@ const AddLeadModal = ({ isOpen, onClose, onAddLead, initialData, isEditing = fal
               </PopoverContent>
             </Popover>
           </div>
+          
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Last Contact Date</label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !lastContactDate && "text-muted-foreground"
+                  )}
+                >
+                  <Calendar className="mr-2 h-4 w-4" />
+                  {lastContactDate ? format(lastContactDate, "PPP") : <span>Pick a date</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <CalendarComponent
+                  mode="single"
+                  selected={lastContactDate}
+                  onSelect={setLastContactDate}
+                  initialFocus
+                  className="pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          
           <div className="space-y-2">
             <label className="text-sm font-medium">Notes</label>
             <Textarea

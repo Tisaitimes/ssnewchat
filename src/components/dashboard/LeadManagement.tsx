@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -153,49 +154,62 @@ const LeadManagement = () => {
   };
 
   const handleEditLead = (updatedLead: Lead) => {
+    // Fix: Use a more reliable way to identify leads with a meaningful identifier
     setLeads(leads.map(lead => 
-      lead.name === selectedLead?.name ? updatedLead : lead
+      lead.email === selectedLead?.email ? updatedLead : lead
     ));
     setIsEditLeadModalOpen(false);
+    // Important: Clear the selected lead after editing to prevent stale references
     setSelectedLead(null);
     toast.success("Lead updated successfully");
   };
 
   const handleDeleteLead = () => {
     if (selectedLead) {
-      setLeads(leads.filter(lead => lead.name !== selectedLead.name));
+      setLeads(leads.filter(lead => lead.email !== selectedLead.email));
       setIsDeleteDialogOpen(false);
       setSelectedLead(null);
       toast.success("Lead deleted successfully");
     }
   };
 
-  const openLeadDetails = (lead: Lead) => {
-    setSelectedLead(lead);
+  const openLeadDetails = (lead: Lead, e?: React.MouseEvent) => {
+    // Stop propagation if event exists (for action buttons)
+    if (e) e.stopPropagation();
+    
+    // Clone the lead to avoid reference issues
+    setSelectedLead({...lead});
     setIsLeadDetailsOpen(true);
   };
 
-  const openEditModal = (lead: Lead) => {
-    setSelectedLead(lead);
+  const openEditModal = (lead: Lead, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    // Clone the lead to avoid reference issues
+    setSelectedLead({...lead});
     setIsEditLeadModalOpen(true);
   };
 
-  const openDeleteDialog = (lead: Lead) => {
-    setSelectedLead(lead);
+  const openDeleteDialog = (lead: Lead, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    // Clone the lead to avoid reference issues
+    setSelectedLead({...lead});
     setIsDeleteDialogOpen(true);
   };
 
-  const handleSendEmail = (email: string) => {
+  const handleSendEmail = (email: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     window.open(`mailto:${email}`);
     toast.success(`Email client opened for ${email}`);
   };
 
-  const handleCall = (phone: string) => {
+  const handleCall = (phone: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     window.open(`tel:${phone}`);
     toast.success(`Calling ${phone}`);
   };
 
-  const handleSendMessage = (lead: Lead) => {
+  const handleSendMessage = (lead: Lead, e: React.MouseEvent) => {
+    e.stopPropagation();
     toast.success(`Sending message to ${lead.name}`);
   };
 
@@ -286,7 +300,6 @@ const LeadManagement = () => {
                 <TableHead>NAME</TableHead>
                 <TableHead>CONTACT</TableHead>
                 <TableHead>ADDRESS</TableHead>
-                <TableHead>SOURCE</TableHead>
                 <TableHead>LAST CONTACT</TableHead>
                 <TableHead className="text-right">ACTIONS</TableHead>
               </TableRow>
@@ -331,17 +344,16 @@ const LeadManagement = () => {
                       {lead.address || 'N/A'}
                     </div>
                   </TableCell>
-                  <TableCell>{lead.source}</TableCell>
                   <TableCell>{lead.lastContact}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-                      <Button variant="ghost" size="icon" onClick={() => handleSendMessage(lead)}>
+                      <Button variant="ghost" size="icon" onClick={(e) => handleSendMessage(lead, e)}>
                         <MessagesSquare className="h-4 w-4 text-gray-600" />
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleSendEmail(lead.email)}>
+                      <Button variant="ghost" size="icon" onClick={(e) => handleSendEmail(lead.email, e)}>
                         <Mail className="h-4 w-4 text-gray-600" />
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleCall(lead.phone)}>
+                      <Button variant="ghost" size="icon" onClick={(e) => handleCall(lead.phone, e)}>
                         <Phone className="h-4 w-4 text-gray-600" />
                       </Button>
                       <DropdownMenu>
@@ -351,11 +363,11 @@ const LeadManagement = () => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => openEditModal(lead)}>
+                          <DropdownMenuItem onClick={(e) => openEditModal(lead, e)}>
                             <Edit className="h-4 w-4 mr-2" />
                             Edit
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="text-red-600" onClick={() => openDeleteDialog(lead)}>
+                          <DropdownMenuItem className="text-red-600" onClick={(e) => openDeleteDialog(lead, e)}>
                             <Trash2 className="h-4 w-4 mr-2" />
                             Delete
                           </DropdownMenuItem>
@@ -483,7 +495,11 @@ const LeadManagement = () => {
 
           <AddLeadModal
             isOpen={isEditLeadModalOpen}
-            onClose={() => setIsEditLeadModalOpen(false)}
+            onClose={() => {
+              setIsEditLeadModalOpen(false);
+              // Clear selected lead to prevent stale references
+              setSelectedLead(null);
+            }}
             onAddLead={handleEditLead}
             initialData={selectedLead}
             isEditing={true}
