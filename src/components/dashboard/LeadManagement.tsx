@@ -12,76 +12,127 @@ import {
   MoreVertical,
   Mail,
   Phone,
-  MessagesSquare
+  MessagesSquare,
+  Edit,
+  Trash2,
+  MapPin
 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import AddLeadModal from '@/components/dashboard/modals/AddLeadModal';
 import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+
+interface Lead {
+  id?: string;
+  initials: string;
+  name: string;
+  email: string;
+  phone: string;
+  address?: string;
+  status: string;
+  source: string;
+  created: string;
+  lastContact: string;
+  notes?: string;
+  avatarUrl?: string;
+}
 
 const LeadManagement = () => {
   const [isAddLeadModalOpen, setIsAddLeadModalOpen] = useState(false);
-  const [leads, setLeads] = useState([
+  const [isEditLeadModalOpen, setIsEditLeadModalOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isLeadDetailsOpen, setIsLeadDetailsOpen] = useState(false);
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [leads, setLeads] = useState<Lead[]>([
     {
       initials: 'SJ',
       name: 'Sarah Johnson',
       email: 'sarah.johnson@example.com',
       phone: '+1 (555) 123-4567',
+      address: '123 Main St, San Francisco, CA',
       status: 'New',
       source: 'Website',
       created: '2025-06-01',
-      lastContact: '2025-06-01'
+      lastContact: '2025-06-01',
+      notes: 'Interested in premium plan'
     },
     {
       initials: 'MR',
       name: 'Michael Roberts',
       email: 'michael.roberts@example.com',
       phone: '+1 (555) 234-5678',
+      address: '456 Oak Ave, Los Angeles, CA',
       status: 'Connected',
       source: 'WhatsApp Campaign',
       created: '2025-05-28',
-      lastContact: '2025-06-02'
+      lastContact: '2025-06-02',
+      notes: 'Follow up about pricing'
     },
     {
       initials: 'JW',
       name: 'Jessica Wilson',
       email: 'jessica.wilson@example.com',
       phone: '+1 (555) 345-6789',
+      address: '789 Pine Rd, San Diego, CA',
       status: 'Qualified',
       source: 'Referral',
       created: '2025-05-25',
-      lastContact: '2025-06-03'
+      lastContact: '2025-06-03',
+      notes: 'Ready for product demo'
     },
     {
       initials: 'DA',
       name: 'David Anderson',
       email: 'david.anderson@example.com',
       phone: '+1 (555) 456-7890',
+      address: '101 Maple Dr, Sacramento, CA',
       status: 'Proposal',
       source: 'WhatsApp Bot',
       created: '2025-05-20',
-      lastContact: '2025-06-04'
+      lastContact: '2025-06-04',
+      notes: 'Sent proposal document'
     },
     {
       initials: 'ET',
       name: 'Emily Thompson',
       email: 'emily.thompson@example.com',
       phone: '+1 (555) 567-8901',
+      address: '202 Cedar Ln, Oakland, CA',
       status: 'Converted',
       source: 'Website',
       created: '2025-05-15',
-      lastContact: '2025-06-05'
+      lastContact: '2025-06-05',
+      notes: 'Completed onboarding'
     },
     {
       initials: 'JW',
       name: 'James Wilson',
       email: 'james.wilson@example.com',
       phone: '+1 (555) 678-9012',
+      address: '303 Elm Blvd, San Jose, CA',
       status: 'Lost',
       source: 'WhatsApp Campaign',
       created: '2025-05-10',
-      lastContact: '2025-06-06'
+      lastContact: '2025-06-06',
+      notes: 'Chose competitor product'
     }
   ]);
 
@@ -97,9 +148,56 @@ const LeadManagement = () => {
     }
   };
 
-  const handleAddLead = (newLead: any) => {
+  const handleAddLead = (newLead: Lead) => {
     setLeads([newLead, ...leads]);
     toast.success("Lead added successfully");
+  };
+
+  const handleEditLead = (updatedLead: Lead) => {
+    setLeads(leads.map(lead => 
+      lead.name === selectedLead?.name ? updatedLead : lead
+    ));
+    setIsEditLeadModalOpen(false);
+    setSelectedLead(null);
+    toast.success("Lead updated successfully");
+  };
+
+  const handleDeleteLead = () => {
+    if (selectedLead) {
+      setLeads(leads.filter(lead => lead.name !== selectedLead.name));
+      setIsDeleteDialogOpen(false);
+      setSelectedLead(null);
+      toast.success("Lead deleted successfully");
+    }
+  };
+
+  const openLeadDetails = (lead: Lead) => {
+    setSelectedLead(lead);
+    setIsLeadDetailsOpen(true);
+  };
+
+  const openEditModal = (lead: Lead) => {
+    setSelectedLead(lead);
+    setIsEditLeadModalOpen(true);
+  };
+
+  const openDeleteDialog = (lead: Lead) => {
+    setSelectedLead(lead);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleSendEmail = (email: string) => {
+    window.open(`mailto:${email}`);
+    toast.success(`Email client opened for ${email}`);
+  };
+
+  const handleCall = (phone: string) => {
+    window.open(`tel:${phone}`);
+    toast.success(`Calling ${phone}`);
+  };
+
+  const handleSendMessage = (lead: Lead) => {
+    toast.success(`Sending message to ${lead.name}`);
   };
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -188,6 +286,7 @@ const LeadManagement = () => {
               <TableRow>
                 <TableHead>NAME</TableHead>
                 <TableHead>CONTACT</TableHead>
+                <TableHead>ADDRESS</TableHead>
                 <TableHead>SOURCE</TableHead>
                 <TableHead>STATUS</TableHead>
                 <TableHead>CREATED</TableHead>
@@ -197,13 +296,17 @@ const LeadManagement = () => {
             </TableHeader>
             <TableBody>
               {leads.map((lead, index) => (
-                <TableRow key={index}>
+                <TableRow key={index} className="cursor-pointer hover:bg-gray-50" onClick={() => openLeadDetails(lead)}>
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-gray-100 text-gray-600">
-                          {lead.initials}
-                        </AvatarFallback>
+                        {lead.avatarUrl ? (
+                          <AvatarImage src={lead.avatarUrl} alt={lead.name} />
+                        ) : (
+                          <AvatarFallback className="bg-gray-100 text-gray-600">
+                            {lead.initials}
+                          </AvatarFallback>
+                        )}
                       </Avatar>
                       <span className="font-medium">{lead.name}</span>
                     </div>
@@ -220,6 +323,12 @@ const LeadManagement = () => {
                       </div>
                     </div>
                   </TableCell>
+                  <TableCell>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <MapPin className="h-3.5 w-3.5 mr-1" />
+                      {lead.address || 'N/A'}
+                    </div>
+                  </TableCell>
                   <TableCell>{lead.source}</TableCell>
                   <TableCell>
                     <Badge className={getStatusColor(lead.status)} variant="outline">
@@ -229,19 +338,33 @@ const LeadManagement = () => {
                   <TableCell>{lead.created}</TableCell>
                   <TableCell>{lead.lastContact}</TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="icon">
+                    <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                      <Button variant="ghost" size="icon" onClick={() => handleSendMessage(lead)}>
                         <MessagesSquare className="h-4 w-4 text-gray-600" />
                       </Button>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" onClick={() => handleSendEmail(lead.email)}>
                         <Mail className="h-4 w-4 text-gray-600" />
                       </Button>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" onClick={() => handleCall(lead.phone)}>
                         <Phone className="h-4 w-4 text-gray-600" />
                       </Button>
-                      <Button variant="ghost" size="icon">
-                        <MoreVertical className="h-4 w-4 text-gray-600" />
-                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreVertical className="h-4 w-4 text-gray-600" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => openEditModal(lead)}>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="text-red-600" onClick={() => openDeleteDialog(lead)}>
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -256,6 +379,110 @@ const LeadManagement = () => {
         onClose={() => setIsAddLeadModalOpen(false)}
         onAddLead={handleAddLead}
       />
+
+      {selectedLead && (
+        <>
+          <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Lead</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete {selectedLead.name}? This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDeleteLead} className="bg-red-500 text-white hover:bg-red-600">
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          <Sheet open={isLeadDetailsOpen} onOpenChange={setIsLeadDetailsOpen}>
+            <SheetContent className="sm:max-w-md">
+              <SheetHeader>
+                <SheetTitle>Lead Details</SheetTitle>
+                <SheetDescription>
+                  View complete information about this lead.
+                </SheetDescription>
+              </SheetHeader>
+              <div className="py-6">
+                <div className="flex items-center mb-6">
+                  <Avatar className="h-16 w-16 mr-4">
+                    {selectedLead.avatarUrl ? (
+                      <AvatarImage src={selectedLead.avatarUrl} alt={selectedLead.name} />
+                    ) : (
+                      <AvatarFallback className="text-xl">{selectedLead.initials}</AvatarFallback>
+                    )}
+                  </Avatar>
+                  <div>
+                    <h3 className="text-lg font-semibold">{selectedLead.name}</h3>
+                    <Badge className={getStatusColor(selectedLead.status)} variant="outline">
+                      {selectedLead.status}
+                    </Badge>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500">Contact Information</h4>
+                    <div className="mt-2 grid gap-2">
+                      <div className="flex items-center">
+                        <Mail className="h-4 w-4 mr-2 text-gray-500" />
+                        <span>{selectedLead.email}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <Phone className="h-4 w-4 mr-2 text-gray-500" />
+                        <span>{selectedLead.phone}</span>
+                      </div>
+                      <div className="flex items-start">
+                        <MapPin className="h-4 w-4 mr-2 text-gray-500 mt-0.5" />
+                        <span>{selectedLead.address || 'No address provided'}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500">Lead Information</h4>
+                    <div className="mt-2 space-y-2">
+                      <div className="grid grid-cols-2">
+                        <span className="text-gray-500">Source:</span>
+                        <span>{selectedLead.source}</span>
+                      </div>
+                      <div className="grid grid-cols-2">
+                        <span className="text-gray-500">Created:</span>
+                        <span>{selectedLead.created}</span>
+                      </div>
+                      <div className="grid grid-cols-2">
+                        <span className="text-gray-500">Last Contact:</span>
+                        <span>{selectedLead.lastContact}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {selectedLead.notes && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Notes</h4>
+                      <p className="mt-2 text-gray-700">{selectedLead.notes}</p>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="mt-6 flex gap-2">
+                  <Button className="flex-1" onClick={() => openEditModal(selectedLead)}>
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit Lead
+                  </Button>
+                  <Button className="flex-1" variant="outline" onClick={() => setIsLeadDetailsOpen(false)}>
+                    Close
+                  </Button>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </>
+      )}
     </div>
   );
 };
