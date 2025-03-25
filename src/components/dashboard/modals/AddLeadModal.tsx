@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -20,13 +20,29 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
+interface Lead {
+  initials: string;
+  name: string;
+  email: string;
+  phone: string;
+  address?: string;
+  status: string;
+  source: string;
+  created: string;
+  lastContact: string;
+  notes?: string;
+  avatarUrl?: string;
+}
+
 interface AddLeadModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddLead: (leadData: any) => void;
+  onAddLead: (leadData: Lead) => void;
+  initialData?: Lead;
+  isEditing?: boolean;
 }
 
-const AddLeadModal = ({ isOpen, onClose, onAddLead }: AddLeadModalProps) => {
+const AddLeadModal = ({ isOpen, onClose, onAddLead, initialData, isEditing = false }: AddLeadModalProps) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -38,6 +54,42 @@ const AddLeadModal = ({ isOpen, onClose, onAddLead }: AddLeadModalProps) => {
   const [avatarUrl, setAvatarUrl] = useState('');
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Populate form with initial data when editing
+  useEffect(() => {
+    if (initialData && isEditing) {
+      setName(initialData.name || '');
+      setEmail(initialData.email || '');
+      setPhone(initialData.phone || '');
+      setSource(initialData.source || 'website');
+      setStatus(initialData.status || 'New');
+      setNotes(initialData.notes || '');
+      setAddress(initialData.address || '');
+      setAvatarUrl(initialData.avatarUrl || '');
+      
+      // Convert string date to Date object if available
+      if (initialData.created) {
+        try {
+          setCreatedDate(new Date(initialData.created));
+        } catch (error) {
+          console.error("Invalid date format:", initialData.created);
+          setCreatedDate(new Date());
+        }
+      }
+    } else {
+      // Reset form when not editing
+      setName('');
+      setEmail('');
+      setPhone('');
+      setSource('website');
+      setStatus('New');
+      setNotes('');
+      setAddress('');
+      setCreatedDate(new Date());
+      setAvatarUrl('');
+      setAvatarFile(null);
+    }
+  }, [initialData, isEditing, isOpen]);
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
@@ -80,20 +132,7 @@ const AddLeadModal = ({ isOpen, onClose, onAddLead }: AddLeadModalProps) => {
     };
     
     onAddLead(leadData);
-    toast.success("Lead added successfully");
-    
-    // Reset form fields
-    setName('');
-    setEmail('');
-    setPhone('');
-    setSource('website');
-    setStatus('New');
-    setNotes('');
-    setAddress('');
-    setCreatedDate(new Date());
-    setAvatarUrl('');
-    setAvatarFile(null);
-    
+    toast.success(isEditing ? "Lead updated successfully" : "Lead added successfully");
     onClose();
   };
 
@@ -101,9 +140,9 @@ const AddLeadModal = ({ isOpen, onClose, onAddLead }: AddLeadModalProps) => {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Add New Lead</DialogTitle>
+          <DialogTitle>{isEditing ? "Edit Lead" : "Add New Lead"}</DialogTitle>
           <DialogDescription>
-            Enter the lead's information below.
+            {isEditing ? "Update the lead's information below." : "Enter the lead's information below."}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -238,7 +277,7 @@ const AddLeadModal = ({ isOpen, onClose, onAddLead }: AddLeadModalProps) => {
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-            <Button type="submit">Add Lead</Button>
+            <Button type="submit">{isEditing ? "Update Lead" : "Add Lead"}</Button>
           </DialogFooter>
         </form>
       </DialogContent>
