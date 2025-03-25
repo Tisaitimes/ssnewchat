@@ -19,20 +19,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-
-interface Lead {
-  initials: string;
-  name: string;
-  email: string;
-  phone: string;
-  address?: string;
-  status: string;
-  source: string;
-  created: string;
-  lastContact: string;
-  notes?: string;
-  avatarUrl?: string;
-}
+import { Lead } from '@/types/lead';
 
 interface AddLeadModalProps {
   isOpen: boolean;
@@ -153,13 +140,15 @@ const AddLeadModal = ({ isOpen, onClose, onAddLead, initialData, isEditing = fal
     };
     
     onAddLead(leadData);
-    toast.success(isEditing ? "Lead updated successfully" : "Lead added successfully");
+    // Note: Removed redundant toast here as it's already handled in LeadManagement
     onClose();
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      if (!open) onClose();
+    }}>
+      <DialogContent className="sm:max-w-[700px]">
         <DialogHeader>
           <DialogTitle>{isEditing ? "Edit Lead" : "Add New Lead"}</DialogTitle>
           <DialogDescription>
@@ -194,42 +183,43 @@ const AddLeadModal = ({ isOpen, onClose, onAddLead, initialData, isEditing = fal
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Name</label>
-            <Input
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter lead name"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Email</label>
-            <Input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter lead email"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Phone</label>
-            <Input
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="Enter lead phone number"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Address</label>
-            <Input
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              placeholder="Enter lead address"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
+          {/* Two-column layout for form fields */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Name</label>
+              <Input
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter lead name"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Email</label>
+              <Input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter lead email"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Phone</label>
+              <Input
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="Enter lead phone number"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Address</label>
+              <Input
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="Enter lead address"
+              />
+            </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Status</label>
               <Select value={status} onValueChange={setStatus}>
@@ -246,59 +236,58 @@ const AddLeadModal = ({ isOpen, onClose, onAddLead, initialData, isEditing = fal
                 </SelectContent>
               </Select>
             </div>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Created Date</label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={"outline"}
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !createdDate && "text-muted-foreground"
-                  )}
-                >
-                  <Calendar className="mr-2 h-4 w-4" />
-                  {createdDate ? format(createdDate, "PPP") : <span>Pick a date</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <CalendarComponent
-                  mode="single"
-                  selected={createdDate}
-                  onSelect={setCreatedDate}
-                  initialFocus
-                  className="pointer-events-auto"
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-          
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Last Contact Date</label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={"outline"}
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !lastContactDate && "text-muted-foreground"
-                  )}
-                >
-                  <Calendar className="mr-2 h-4 w-4" />
-                  {lastContactDate ? format(lastContactDate, "PPP") : <span>Pick a date</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <CalendarComponent
-                  mode="single"
-                  selected={lastContactDate}
-                  onSelect={setLastContactDate}
-                  initialFocus
-                  className="pointer-events-auto"
-                />
-              </PopoverContent>
-            </Popover>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Created Date</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !createdDate && "text-muted-foreground"
+                    )}
+                  >
+                    <Calendar className="mr-2 h-4 w-4" />
+                    {createdDate ? format(createdDate, "PPP") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent
+                    mode="single"
+                    selected={createdDate}
+                    onSelect={setCreatedDate}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Last Contact Date</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !lastContactDate && "text-muted-foreground"
+                    )}
+                  >
+                    <Calendar className="mr-2 h-4 w-4" />
+                    {lastContactDate ? format(lastContactDate, "PPP") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent
+                    mode="single"
+                    selected={lastContactDate}
+                    onSelect={setLastContactDate}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
           
           <div className="space-y-2">

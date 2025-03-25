@@ -168,6 +168,11 @@ const LeadManagement = () => {
     toast.success("Leads exported successfully");
   };
 
+  const closeEditModal = () => {
+    setIsEditLeadModalOpen(false);
+    setSelectedLead(null);
+  };
+
   return (
     <div className="p-6">
       <LeadToolbar 
@@ -216,18 +221,18 @@ const LeadManagement = () => {
               openEditModal(selectedLead);
             }}
           />
-
-          <AddLeadModal
-            isOpen={isEditLeadModalOpen}
-            onClose={() => {
-              setIsEditLeadModalOpen(false);
-              setSelectedLead(null);
-            }}
-            onAddLead={handleEditLead}
-            initialData={selectedLead}
-            isEditing={true}
-          />
         </>
+      )}
+
+      {/* Important: Using a separate conditional for the edit modal */}
+      {isEditLeadModalOpen && selectedLead && (
+        <AddLeadModal
+          isOpen={isEditLeadModalOpen}
+          onClose={closeEditModal}
+          onAddLead={handleEditLead}
+          initialData={selectedLead}
+          isEditing={true}
+        />
       )}
     </div>
   );
