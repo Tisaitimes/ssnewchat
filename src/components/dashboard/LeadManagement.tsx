@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -288,8 +287,6 @@ const LeadManagement = () => {
                 <TableHead>CONTACT</TableHead>
                 <TableHead>ADDRESS</TableHead>
                 <TableHead>SOURCE</TableHead>
-                <TableHead>STATUS</TableHead>
-                <TableHead>CREATED</TableHead>
                 <TableHead>LAST CONTACT</TableHead>
                 <TableHead className="text-right">ACTIONS</TableHead>
               </TableRow>
@@ -298,17 +295,22 @@ const LeadManagement = () => {
               {leads.map((lead, index) => (
                 <TableRow key={index} className="cursor-pointer hover:bg-gray-50" onClick={() => openLeadDetails(lead)}>
                   <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-8 w-8">
-                        {lead.avatarUrl ? (
-                          <AvatarImage src={lead.avatarUrl} alt={lead.name} />
-                        ) : (
-                          <AvatarFallback className="bg-gray-100 text-gray-600">
-                            {lead.initials}
-                          </AvatarFallback>
-                        )}
-                      </Avatar>
-                      <span className="font-medium">{lead.name}</span>
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8">
+                          {lead.avatarUrl ? (
+                            <AvatarImage src={lead.avatarUrl} alt={lead.name} />
+                          ) : (
+                            <AvatarFallback className="bg-gray-100 text-gray-600">
+                              {lead.initials}
+                            </AvatarFallback>
+                          )}
+                        </Avatar>
+                        <span className="font-medium">{lead.name}</span>
+                      </div>
+                      <Badge className={getStatusColor(lead.status)} variant="outline">
+                        {lead.status}
+                      </Badge>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -330,12 +332,6 @@ const LeadManagement = () => {
                     </div>
                   </TableCell>
                   <TableCell>{lead.source}</TableCell>
-                  <TableCell>
-                    <Badge className={getStatusColor(lead.status)} variant="outline">
-                      {lead.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{lead.created}</TableCell>
                   <TableCell>{lead.lastContact}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
@@ -470,7 +466,10 @@ const LeadManagement = () => {
                 </div>
                 
                 <div className="mt-6 flex gap-2">
-                  <Button className="flex-1" onClick={() => openEditModal(selectedLead)}>
+                  <Button className="flex-1" onClick={() => {
+                    setIsLeadDetailsOpen(false);
+                    openEditModal(selectedLead);
+                  }}>
                     <Edit className="h-4 w-4 mr-2" />
                     Edit Lead
                   </Button>
@@ -481,6 +480,14 @@ const LeadManagement = () => {
               </div>
             </SheetContent>
           </Sheet>
+
+          <AddLeadModal
+            isOpen={isEditLeadModalOpen}
+            onClose={() => setIsEditLeadModalOpen(false)}
+            onAddLead={handleEditLead}
+            initialData={selectedLead}
+            isEditing={true}
+          />
         </>
       )}
     </div>
