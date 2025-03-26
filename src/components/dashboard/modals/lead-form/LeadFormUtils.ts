@@ -15,7 +15,7 @@ export const prepareLeadData = (
   avatarUrl: string
 ): Lead => {
   // Creating avatar URL based on name if no avatar uploaded
-  const fallbackAvatarUrl = `https://ui-avatars.com/api/?name=${name}&background=random`;
+  const fallbackAvatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`;
   
   return {
     name,

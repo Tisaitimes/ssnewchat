@@ -122,8 +122,9 @@ const LeadManagement = () => {
 
   const openEditModal = (lead: Lead, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    // Make a deep copy of the lead to prevent reference issues
-    setSelectedLead(JSON.parse(JSON.stringify(lead)));
+    // Create a deep copy to prevent reference issues
+    const leadCopy = JSON.parse(JSON.stringify(lead));
+    setSelectedLead(leadCopy);
     setIsEditLeadModalOpen(true);
   };
 
@@ -171,8 +172,10 @@ const LeadManagement = () => {
 
   const closeEditModal = () => {
     setIsEditLeadModalOpen(false);
-    // Ensure we completely clear the selectedLead state when closing the modal
-    setSelectedLead(null);
+    // Make sure we completely clear the selectedLead state
+    setTimeout(() => {
+      setSelectedLead(null);
+    }, 0);
   };
 
   return (
@@ -226,7 +229,7 @@ const LeadManagement = () => {
         </>
       )}
 
-      {/* Using a separate conditional for the edit modal */}
+      {/* Using conditional rendering for the edit modal */}
       {isEditLeadModalOpen && selectedLead && (
         <AddLeadModal
           isOpen={isEditLeadModalOpen}
