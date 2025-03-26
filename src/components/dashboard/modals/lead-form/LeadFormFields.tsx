@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -9,6 +9,7 @@ import { Calendar } from "lucide-react";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import CountryCodeSelect from './CountryCodeSelect';
 
 interface LeadFormFieldsProps {
   name: string;
@@ -29,6 +30,10 @@ interface LeadFormFieldsProps {
   setCreatedDate: (date: Date | undefined) => void;
   lastContactDate: Date | undefined;
   setLastContactDate: (date: Date | undefined) => void;
+  referralName?: string;
+  setReferralName?: (name: string) => void;
+  countryCode: string;
+  setCountryCode: (code: string) => void;
 }
 
 const LeadFormFields = ({
@@ -40,8 +45,20 @@ const LeadFormFields = ({
   notes, setNotes, 
   address, setAddress,
   createdDate, setCreatedDate,
-  lastContactDate, setLastContactDate
+  lastContactDate, setLastContactDate,
+  referralName = '', 
+  setReferralName = () => {},
+  countryCode,
+  setCountryCode
 }: LeadFormFieldsProps) => {
+  // Local state to track if referral source is selected
+  const [isReferralSelected, setIsReferralSelected] = useState(source === 'Referral');
+
+  // Update referral selection state when source changes
+  useEffect(() => {
+    setIsReferralSelected(source === 'Referral');
+  }, [source]);
+
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -65,12 +82,55 @@ const LeadFormFields = ({
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-medium">Phone</label>
-          <Input
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="Enter lead phone number"
-          />
+          <label className="text-sm font-medium">Phone Number</label>
+          <div className="flex items-center gap-2">
+            <div className="w-1/4">
+              <CountryCodeSelect 
+                value={countryCode} 
+                onChange={setCountryCode} 
+              />
+            </div>
+            <div className="flex-1">
+              <Input
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="Enter phone number"
+              />
+            </div>
+          </div>
+        </div>
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Source</label>
+          <Select value={source} onValueChange={(value) => {
+            setSource(value);
+            // Clear referral name if not referral
+            if (value !== 'Referral' && setReferralName) {
+              setReferralName('');
+            }
+          }}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select source" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Website">Website</SelectItem>
+              <SelectItem value="Facebook">Facebook</SelectItem>
+              <SelectItem value="YouTube">YouTube</SelectItem>
+              <SelectItem value="WhatsApp Campaign">WhatsApp Campaign</SelectItem>
+              <SelectItem value="Referral">Referral</SelectItem>
+              <SelectItem value="Others">Others</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          {/* Conditional referral name field */}
+          {isReferralSelected && (
+            <div className="mt-2">
+              <Input
+                value={referralName}
+                onChange={(e) => setReferralName(e.target.value)}
+                placeholder="Enter referrer's name"
+              />
+            </div>
+          )}
         </div>
         <div className="space-y-2">
           <label className="text-sm font-medium">Address</label>

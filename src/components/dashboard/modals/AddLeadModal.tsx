@@ -27,7 +27,7 @@ const AddLeadModal = ({ isOpen, onClose, onAddLead, initialData, isEditing = fal
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [source, setSource] = useState('website');
+  const [source, setSource] = useState('Website');
   const [status, setStatus] = useState('New');
   const [notes, setNotes] = useState('');
   const [address, setAddress] = useState('');
@@ -35,18 +35,39 @@ const AddLeadModal = ({ isOpen, onClose, onAddLead, initialData, isEditing = fal
   const [lastContactDate, setLastContactDate] = useState<Date | undefined>(new Date());
   const [avatarUrl, setAvatarUrl] = useState('');
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [referralName, setReferralName] = useState('');
+  const [countryCode, setCountryCode] = useState('+1');
 
   // Populate form with initial data when editing
   useEffect(() => {
     if (initialData && isEditing) {
       setName(initialData.name || '');
       setEmail(initialData.email || '');
-      setPhone(initialData.phone || '');
-      setSource(initialData.source || 'website');
+      
+      // Extract phone number without country code if it exists
+      const phoneWithCode = initialData.phone || '';
+      // Simple pattern to try to extract country code and phone
+      const phoneMatch = phoneWithCode.match(/^(\+\d+)?\s*(.*)$/);
+      if (phoneMatch) {
+        setCountryCode(phoneMatch[1] || '+1');
+        setPhone(phoneMatch[2] || phoneWithCode);
+      } else {
+        setPhone(phoneWithCode);
+      }
+      
+      setSource(initialData.source || 'Website');
       setStatus(initialData.status || 'New');
       setNotes(initialData.notes || '');
       setAddress(initialData.address || '');
       setAvatarUrl(initialData.avatarUrl || '');
+      
+      // Extract referral name from notes if source is Referral
+      if (initialData.source === 'Referral' && initialData.notes) {
+        const referralMatch = initialData.notes.match(/Referral: ([^\n]+)/);
+        if (referralMatch) {
+          setReferralName(referralMatch[1]);
+        }
+      }
       
       // Convert string date to Date object if available
       if (initialData.created) {
@@ -74,7 +95,7 @@ const AddLeadModal = ({ isOpen, onClose, onAddLead, initialData, isEditing = fal
       setName('');
       setEmail('');
       setPhone('');
-      setSource('website');
+      setSource('Website');
       setStatus('New');
       setNotes('');
       setAddress('');
@@ -82,6 +103,8 @@ const AddLeadModal = ({ isOpen, onClose, onAddLead, initialData, isEditing = fal
       setLastContactDate(new Date());
       setAvatarUrl('');
       setAvatarFile(null);
+      setReferralName('');
+      setCountryCode('+1');
     }
   }, [initialData, isEditing, isOpen]);
 
@@ -95,13 +118,22 @@ const AddLeadModal = ({ isOpen, onClose, onAddLead, initialData, isEditing = fal
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Combine country code and phone
+    const fullPhone = `${countryCode} ${phone}`;
+    
+    // Add referral name to notes if source is Referral
+    let updatedNotes = notes;
+    if (source === 'Referral' && referralName) {
+      updatedNotes = `Referral: ${referralName}\n${notes}`;
+    }
+    
     const leadData = prepareLeadData(
       name,
       email,
-      phone,
+      fullPhone,
       source,
       status,
-      notes,
+      updatedNotes,
       address,
       createdDate,
       lastContactDate,
@@ -149,6 +181,10 @@ const AddLeadModal = ({ isOpen, onClose, onAddLead, initialData, isEditing = fal
             setCreatedDate={setCreatedDate}
             lastContactDate={lastContactDate}
             setLastContactDate={setLastContactDate}
+            referralName={referralName}
+            setReferralName={setReferralName}
+            countryCode={countryCode}
+            setCountryCode={setCountryCode}
           />
           
           <DialogFooter>
