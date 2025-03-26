@@ -1,22 +1,14 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { toast } from 'sonner';
-import AddLeadModal from '@/components/dashboard/modals/AddLeadModal';
-import LeadTable from '@/components/dashboard/leads/LeadTable';
-import LeadDetails from '@/components/dashboard/leads/LeadDetails';
-import LeadDeleteDialog from '@/components/dashboard/leads/LeadDeleteDialog';
+import React from 'react';
 import LeadToolbar from '@/components/dashboard/leads/LeadToolbar';
-import { getStatusColor, generateCsv } from '@/components/dashboard/leads/utils/leadUtils';
-import { Lead } from '@/types/lead';
+import LeadTableContainer from '@/components/dashboard/leads/LeadTableContainer';
+import LeadModals from '@/components/dashboard/leads/LeadModals';
+import { getStatusColor } from '@/components/dashboard/leads/utils/leadUtils';
+import useLeadManagement from '@/hooks/useLeadManagement';
 
 const LeadManagement = () => {
-  const [isAddLeadModalOpen, setIsAddLeadModalOpen] = useState(false);
-  const [isEditLeadModalOpen, setIsEditLeadModalOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isLeadDetailsOpen, setIsLeadDetailsOpen] = useState(false);
-  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
-  const [leads, setLeads] = useState<Lead[]>([
+  // Sample data for initial leads
+  const initialLeads = [
     {
       initials: 'SJ',
       name: 'Sarah Johnson',
@@ -89,94 +81,32 @@ const LeadManagement = () => {
       lastContact: '2025-06-06',
       notes: 'Chose competitor product'
     }
-  ]);
+  ];
 
-  const handleAddLead = (newLead: Lead) => {
-    setLeads([newLead, ...leads]);
-    toast.success("Lead added successfully");
-  };
-
-  const handleEditLead = (updatedLead: Lead) => {
-    setLeads(leads.map(lead => 
-      lead.email === selectedLead?.email ? updatedLead : lead
-    ));
-    setIsEditLeadModalOpen(false);
-    setSelectedLead(null);
-    toast.success("Lead updated successfully");
-  };
-
-  const handleDeleteLead = () => {
-    if (selectedLead) {
-      setLeads(leads.filter(lead => lead.email !== selectedLead.email));
-      setIsDeleteDialogOpen(false);
-      setSelectedLead(null);
-      toast.success("Lead deleted successfully");
-    }
-  };
-
-  const openLeadDetails = (lead: Lead, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    setSelectedLead({...lead});
-    setIsLeadDetailsOpen(true);
-  };
-
-  const openEditModal = (lead: Lead, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    // Create a deep copy to prevent reference issues
-    const leadCopy = JSON.parse(JSON.stringify(lead));
-    setSelectedLead(leadCopy);
-    setIsEditLeadModalOpen(true);
-  };
-
-  const openDeleteDialog = (lead: Lead, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    setSelectedLead({...lead});
-    setIsDeleteDialogOpen(true);
-  };
-
-  const handleSendEmail = (email: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    window.open(`mailto:${email}`);
-    toast.success(`Email client opened for ${email}`);
-  };
-
-  const handleCall = (phone: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    window.open(`tel:${phone}`);
-    toast.success(`Calling ${phone}`);
-  };
-
-  const handleSendMessage = (lead: Lead, e: React.MouseEvent) => {
-    e.stopPropagation();
-    toast.success(`Sending message to ${lead.name}`);
-  };
-
-  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      toast.success("Leads imported successfully");
-    }
-  };
-
-  const handleExport = () => {
-    const csv = generateCsv(leads);
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'leads.csv';
-    a.click();
-    
-    toast.success("Leads exported successfully");
-  };
-
-  const closeEditModal = () => {
-    setIsEditLeadModalOpen(false);
-    // Make sure we completely clear the selectedLead state
-    setTimeout(() => {
-      setSelectedLead(null);
-    }, 0);
-  };
+  // Use the hook to manage lead state and operations
+  const {
+    leads,
+    isAddLeadModalOpen,
+    setIsAddLeadModalOpen,
+    isEditLeadModalOpen,
+    isDeleteDialogOpen,
+    isLeadDetailsOpen,
+    selectedLead,
+    handleAddLead,
+    handleEditLead,
+    handleDeleteLead,
+    openLeadDetails,
+    openEditModal,
+    openDeleteDialog,
+    handleSendEmail,
+    handleCall,
+    handleSendMessage,
+    handleImport,
+    handleExport,
+    closeEditModal,
+    setIsLeadDetailsOpen,
+    setIsDeleteDialogOpen
+  } = useLeadManagement(initialLeads);
 
   return (
     <div className="p-6">
@@ -186,59 +116,33 @@ const LeadManagement = () => {
         onImport={handleImport}
       />
 
-      <Card>
-        <CardContent className="p-0">
-          <LeadTable 
-            leads={leads}
-            openLeadDetails={openLeadDetails}
-            openEditModal={openEditModal}
-            openDeleteDialog={openDeleteDialog}
-            handleSendEmail={handleSendEmail}
-            handleCall={handleCall}
-            handleSendMessage={handleSendMessage}
-            getStatusColor={getStatusColor}
-          />
-        </CardContent>
-      </Card>
-
-      <AddLeadModal
-        isOpen={isAddLeadModalOpen}
-        onClose={() => setIsAddLeadModalOpen(false)}
-        onAddLead={handleAddLead}
+      <LeadTableContainer 
+        leads={leads}
+        openLeadDetails={openLeadDetails}
+        openEditModal={openEditModal}
+        openDeleteDialog={openDeleteDialog}
+        handleSendEmail={handleSendEmail}
+        handleCall={handleCall}
+        handleSendMessage={handleSendMessage}
+        getStatusColor={getStatusColor}
       />
 
-      {selectedLead && (
-        <>
-          <LeadDeleteDialog 
-            isOpen={isDeleteDialogOpen}
-            onOpenChange={setIsDeleteDialogOpen}
-            lead={selectedLead}
-            onDelete={handleDeleteLead}
-          />
-
-          <LeadDetails 
-            isOpen={isLeadDetailsOpen}
-            onOpenChange={setIsLeadDetailsOpen}
-            lead={selectedLead}
-            getStatusColor={getStatusColor}
-            onEdit={() => {
-              setIsLeadDetailsOpen(false);
-              openEditModal(selectedLead);
-            }}
-          />
-        </>
-      )}
-
-      {/* Using conditional rendering for the edit modal */}
-      {isEditLeadModalOpen && selectedLead && (
-        <AddLeadModal
-          isOpen={isEditLeadModalOpen}
-          onClose={closeEditModal}
-          onAddLead={handleEditLead}
-          initialData={selectedLead}
-          isEditing={true}
-        />
-      )}
+      <LeadModals 
+        isAddLeadModalOpen={isAddLeadModalOpen}
+        isEditLeadModalOpen={isEditLeadModalOpen}
+        isDeleteDialogOpen={isDeleteDialogOpen}
+        isLeadDetailsOpen={isLeadDetailsOpen}
+        selectedLead={selectedLead}
+        handleAddLead={handleAddLead}
+        handleEditLead={handleEditLead}
+        handleDeleteLead={handleDeleteLead}
+        closeEditModal={closeEditModal}
+        setIsLeadDetailsOpen={setIsLeadDetailsOpen}
+        setIsDeleteDialogOpen={setIsDeleteDialogOpen}
+        getStatusColor={getStatusColor}
+        openEditModal={openEditModal}
+        setIsAddLeadModalOpen={setIsAddLeadModalOpen}
+      />
     </div>
   );
 };
