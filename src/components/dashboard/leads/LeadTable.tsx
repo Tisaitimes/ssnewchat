@@ -8,7 +8,7 @@ import {
   Mail, 
   Phone, 
   MapPin,
-  WhatsApp
+  MessageSquare
 } from 'lucide-react';
 import { Lead } from '@/types/lead';
 
@@ -108,7 +108,7 @@ const LeadTable: React.FC<LeadTableProps> = ({
                   onClick={(e) => handleSendMessage(lead, e)}
                   title="WhatsApp"
                 >
-                  <WhatsApp className="h-4 w-4 text-green-600" />
+                  <MessageSquare className="h-4 w-4 text-green-600" />
                 </Button>
               </div>
             </TableCell>
