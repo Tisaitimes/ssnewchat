@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Mail, Phone, MapPin, Edit, Trash2, Calendar, Clock, FileText } from 'lucide-react';
+import { Mail, Phone, MapPin, Edit, Calendar, Clock, FileText } from 'lucide-react';
 import { Lead } from '@/types/lead';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -24,11 +24,9 @@ const LeadDetails: React.FC<LeadDetailsProps> = ({
   onOpenChange,
   lead,
   getStatusColor,
-  onEdit,
-  onDelete
+  onEdit
 }) => {
   const { user } = useAuth();
-  const isAdmin = user?.email?.includes('admin') || false; // Simple admin check - you may want to replace with your own logic
   
   if (!lead) return null;
 
@@ -134,13 +132,6 @@ const LeadDetails: React.FC<LeadDetailsProps> = ({
               <Edit className="h-4 w-4 mr-2" />
               Edit Lead
             </Button>
-            
-            {isAdmin && onDelete && (
-              <Button className="flex-1" variant="destructive" onClick={onDelete}>
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete Lead
-              </Button>
-            )}
             
             <Button className="flex-1" variant="outline" onClick={() => onOpenChange(false)}>
               Close
