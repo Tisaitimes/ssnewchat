@@ -28,7 +28,7 @@ const HowItWorksDialog: React.FC<HowItWorksDialogProps> = ({ isOpen, onOpenChang
           <DialogTitle className="text-2xl">How Marketing Automation Works</DialogTitle>
         </DialogHeader>
         
-        <ScrollArea className="h-[500px] pr-4">
+        <ScrollArea className="h-[500px] pr-4 mt-4">
           <div className="space-y-6 pb-6">
             <section>
               <h3 className="text-xl font-semibold mb-2">What is Marketing Automation?</h3>
