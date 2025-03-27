@@ -66,10 +66,6 @@ const LeadModals: React.FC<LeadModalsProps> = ({
               setIsLeadDetailsOpen(false);
               openEditModal(selectedLead);
             }}
-            onDelete={() => {
-              setIsLeadDetailsOpen(false);
-              openDeleteDialog(selectedLead);
-            }}
           />
         </>
       )}

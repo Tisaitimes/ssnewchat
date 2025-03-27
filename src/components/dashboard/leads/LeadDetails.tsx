@@ -5,7 +5,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { Mail, Phone, MapPin, Edit, Calendar, Clock, FileText } from 'lucide-react';
 import { Lead } from '@/types/lead';
 import { useAuth } from '@/contexts/AuthContext';
