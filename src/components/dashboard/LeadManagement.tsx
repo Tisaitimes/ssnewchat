@@ -139,9 +139,10 @@ const LeadManagement = () => {
         closeEditModal={closeEditModal}
         setIsLeadDetailsOpen={setIsLeadDetailsOpen}
         setIsDeleteDialogOpen={setIsDeleteDialogOpen}
+        setIsAddLeadModalOpen={setIsAddLeadModalOpen}
         getStatusColor={getStatusColor}
         openEditModal={openEditModal}
-        setIsAddLeadModalOpen={setIsAddLeadModalOpen}
+        openDeleteDialog={openDeleteDialog}
       />
     </div>
   );
