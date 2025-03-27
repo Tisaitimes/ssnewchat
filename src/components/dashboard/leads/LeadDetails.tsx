@@ -16,7 +16,6 @@ interface LeadDetailsProps {
   lead: Lead | null;
   getStatusColor: (status: string) => string;
   onEdit: () => void;
-  onDelete?: () => void;
 }
 
 const LeadDetails: React.FC<LeadDetailsProps> = ({

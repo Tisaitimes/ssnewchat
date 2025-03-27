@@ -1,13 +1,13 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Zap, PlayCircle, PauseCircle, PlusCircle, Settings, Timer, Calendar, Users, Clock, Trash2, MessageSquare, Filter } from 'lucide-react';
+import { Zap, PlayCircle, PauseCircle, PlusCircle, Settings, Timer, Calendar, Users, Clock, Trash2, MessageSquare, Filter, HelpCircle, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CreateWorkflowDialog from './marketing/CreateWorkflowDialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 type AutomationWorkflow = {
   id: string;
@@ -94,27 +94,39 @@ const MarketingAutomation = () => {
       name: 'Summer Sale Reminder',
       scheduled: 'tomorrow at 10:00 AM',
       type: 'promotional',
-      status: 'pending'
+      status: 'pending',
+      description: 'Sends a reminder about our summer sale to all customers',
+      audience: 'All customers',
+      messageContent: 'Don\'t miss our Summer Sale! Up to 50% off on selected items.',
     },
     {
       id: '2',
       name: 'Birthday Message: John Smith',
       scheduled: '06/28/2023 at 9:00 AM',
       type: 'birthday',
-      status: 'pending'
+      status: 'pending',
+      description: 'Birthday wishes and special offer for John Smith',
+      audience: 'Individual customer',
+      messageContent: 'Happy Birthday, John! Enjoy 20% off your next purchase with code BDAY20.',
     },
     {
       id: '3',
       name: '24-Hour Follow-up: New Signups',
       scheduled: 'Recurring daily at 3:00 PM',
       type: 'follow-up',
-      status: 'recurring'
+      status: 'recurring',
+      description: 'Follows up with customers who signed up in the last 24 hours',
+      audience: 'New signups',
+      messageContent: 'Thank you for signing up! How can we help you get started?',
     }
   ]);
 
   const [isCreateWorkflowOpen, setIsCreateWorkflowOpen] = useState(false);
   const [selectedWorkflow, setSelectedWorkflow] = useState<AutomationWorkflow | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [isHelpDialogOpen, setIsHelpDialogOpen] = useState(false);
+  const [viewingAutomation, setViewingAutomation] = useState<any>(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
 
   const toggleWorkflowStatus = (workflowId: string) => {
     setWorkflows(workflows.map(workflow => {
@@ -159,11 +171,9 @@ const MarketingAutomation = () => {
 
   const handleSaveWorkflow = (workflow: AutomationWorkflow) => {
     if (selectedWorkflow) {
-      // Update existing workflow
       setWorkflows(workflows.map(w => w.id === workflow.id ? workflow : w));
       toast.success(`Workflow "${workflow.name}" updated`);
     } else {
-      // Add new workflow
       setWorkflows([workflow, ...workflows]);
       toast.success(`Workflow "${workflow.name}" created`);
     }
@@ -232,10 +242,14 @@ const MarketingAutomation = () => {
     ? workflows 
     : workflows.filter(workflow => workflow.status === statusFilter);
 
-  // Cancel a scheduled automation
   const cancelScheduledAutomation = (id: string) => {
     setScheduledAutomations(scheduledAutomations.filter(automation => automation.id !== id));
     toast.success('Scheduled automation cancelled');
+  };
+
+  const viewScheduledAutomation = (automation: any) => {
+    setViewingAutomation(automation);
+    setIsViewDialogOpen(true);
   };
 
   return (
@@ -252,13 +266,19 @@ const MarketingAutomation = () => {
                 Create and manage automated marketing workflows
               </CardDescription>
             </div>
-            <Button onClick={() => {
-              setSelectedWorkflow(null);
-              setIsCreateWorkflowOpen(true);
-            }}>
-              <PlusCircle className="h-4 w-4 mr-2" />
-              Create Workflow
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setIsHelpDialogOpen(true)}>
+                <HelpCircle className="h-4 w-4 mr-2" />
+                How it works
+              </Button>
+              <Button onClick={() => {
+                setSelectedWorkflow(null);
+                setIsCreateWorkflowOpen(true);
+              }}>
+                <PlusCircle className="h-4 w-4 mr-2" />
+                Create Workflow
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -473,11 +493,21 @@ const MarketingAutomation = () => {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => toast.info(`Viewing scheduled automation: ${automation.name}`)}>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => viewScheduledAutomation(automation)}
+                  >
+                    <Eye className="h-4 w-4 mr-1" />
                     View
                   </Button>
                   {automation.status !== 'recurring' && (
-                    <Button size="sm" variant="destructive" onClick={() => cancelScheduledAutomation(automation.id)}>
+                    <Button 
+                      size="sm" 
+                      variant="destructive" 
+                      onClick={() => cancelScheduledAutomation(automation.id)}
+                    >
+                      <Trash2 className="h-4 w-4 mr-1" />
                       Cancel
                     </Button>
                   )}
@@ -493,6 +523,132 @@ const MarketingAutomation = () => {
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={isHelpDialogOpen} onOpenChange={setIsHelpDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <HelpCircle className="h-5 w-5 text-primary" />
+              How Marketing Automation Works
+            </DialogTitle>
+            <DialogDescription>
+              Learn how to create and manage automated marketing campaigns
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 mt-4">
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Workflows</h3>
+              <p className="text-muted-foreground">
+                Workflows are automated sequences of messages that are triggered by specific events or scheduled at specific times.
+                You can create different types of workflows for various marketing purposes.
+              </p>
+              <ul className="mt-2 space-y-1 list-disc list-inside text-muted-foreground">
+                <li><strong>Welcome Series</strong>: Sent to new subscribers</li>
+                <li><strong>Follow-up</strong>: Sent after a specific action or time period</li>
+                <li><strong>Promotional</strong>: Marketing campaigns for products or services</li>
+                <li><strong>Birthday</strong>: Special offers or greetings on customer birthdays</li>
+                <li><strong>Abandoned Cart</strong>: Reminders for customers who left items in their cart</li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Creating Workflows</h3>
+              <p className="text-muted-foreground">
+                To create a workflow, click the "Create Workflow" button and fill in the details:
+              </p>
+              <ul className="mt-2 space-y-1 list-disc list-inside text-muted-foreground">
+                <li>Name your workflow</li>
+                <li>Select the workflow type</li>
+                <li>Define the audience (who will receive the messages)</li>
+                <li>Set the trigger type (immediate, scheduled, or event-based)</li>
+                <li>Create your message content</li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Scheduled Automations</h3>
+              <p className="text-muted-foreground">
+                Scheduled automations are messages that will be sent at specific times. You can:
+              </p>
+              <ul className="mt-2 space-y-1 list-disc list-inside text-muted-foreground">
+                <li><strong>View</strong>: See details about the scheduled message</li>
+                <li><strong>Cancel</strong>: Stop the automation from being sent (one-time automations only)</li>
+                <li>Recurring automations run on a regular schedule and cannot be cancelled individually</li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Performance Tracking</h3>
+              <p className="text-muted-foreground">
+                Monitor the performance of your workflows to see how effective they are:
+              </p>
+              <ul className="mt-2 space-y-1 list-disc list-inside text-muted-foreground">
+                <li><strong>Triggers</strong>: How many times the workflow has been triggered</li>
+                <li><strong>Conversions</strong>: How many recipients took the desired action</li>
+                <li><strong>Conversion Rate</strong>: Percentage of triggers that resulted in conversions</li>
+              </ul>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Scheduled Automation Details</DialogTitle>
+          </DialogHeader>
+          {viewingAutomation && (
+            <div className="space-y-4 mt-2">
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <h4 className="text-sm font-semibold text-muted-foreground">Name</h4>
+                  <p>{viewingAutomation.name}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-muted-foreground">Type</h4>
+                  <p className="capitalize">{viewingAutomation.type}</p>
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="text-sm font-semibold text-muted-foreground">Schedule</h4>
+                <p>{viewingAutomation.scheduled}</p>
+              </div>
+              
+              <div>
+                <h4 className="text-sm font-semibold text-muted-foreground">Description</h4>
+                <p>{viewingAutomation.description}</p>
+              </div>
+              
+              <div>
+                <h4 className="text-sm font-semibold text-muted-foreground">Audience</h4>
+                <p>{viewingAutomation.audience}</p>
+              </div>
+              
+              <div>
+                <h4 className="text-sm font-semibold text-muted-foreground">Message</h4>
+                <p className="p-3 bg-muted rounded-md">{viewingAutomation.messageContent}</p>
+              </div>
+              
+              <div className="flex justify-end gap-2 pt-2">
+                {viewingAutomation.status !== 'recurring' && (
+                  <Button 
+                    variant="destructive" 
+                    onClick={() => {
+                      cancelScheduledAutomation(viewingAutomation.id);
+                      setIsViewDialogOpen(false);
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Cancel Automation
+                  </Button>
+                )}
+                <Button onClick={() => setIsViewDialogOpen(false)}>Close</Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <CreateWorkflowDialog 
         isOpen={isCreateWorkflowOpen}
