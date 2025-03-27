@@ -10,8 +10,6 @@ import {
   MessagesSquare, 
   MoreVertical,
   MapPin,
-  Edit,
-  Trash2
 } from 'lucide-react';
 import { 
   DropdownMenu,
@@ -112,13 +110,8 @@ const LeadTable: React.FC<LeadTableProps> = ({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={(e) => openEditModal(lead, e)}>
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="text-red-600" onClick={(e) => openDeleteDialog(lead, e)}>
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
+                    <DropdownMenuItem onClick={(e) => openLeadDetails(lead, e)}>
+                      View Details
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

@@ -20,6 +20,7 @@ interface LeadModalsProps {
   setIsAddLeadModalOpen: (open: boolean) => void;
   getStatusColor: (status: string) => string;
   openEditModal: (lead: Lead) => void;
+  openDeleteDialog: (lead: Lead) => void;
 }
 
 const LeadModals: React.FC<LeadModalsProps> = ({
@@ -36,7 +37,8 @@ const LeadModals: React.FC<LeadModalsProps> = ({
   setIsDeleteDialogOpen,
   setIsAddLeadModalOpen,
   getStatusColor,
-  openEditModal
+  openEditModal,
+  openDeleteDialog
 }) => {
   return (
     <>
@@ -63,6 +65,10 @@ const LeadModals: React.FC<LeadModalsProps> = ({
             onEdit={() => {
               setIsLeadDetailsOpen(false);
               openEditModal(selectedLead);
+            }}
+            onDelete={() => {
+              setIsLeadDetailsOpen(false);
+              openDeleteDialog(selectedLead);
             }}
           />
         </>
