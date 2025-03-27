@@ -18,7 +18,10 @@ interface LeadTableContainerProps {
 const LeadTableContainer: React.FC<LeadTableContainerProps> = ({
   leads,
   openLeadDetails,
-  getStatusColor
+  getStatusColor,
+  handleSendEmail,
+  handleCall,
+  handleSendMessage
 }) => {
   return (
     <Card>
@@ -27,6 +30,9 @@ const LeadTableContainer: React.FC<LeadTableContainerProps> = ({
           leads={leads}
           openLeadDetails={openLeadDetails}
           getStatusColor={getStatusColor}
+          handleSendEmail={handleSendEmail}
+          handleCall={handleCall}
+          handleSendMessage={handleSendMessage}
         />
       </CardContent>
     </Card>
